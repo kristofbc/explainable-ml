@@ -4,7 +4,7 @@ import numpy as np
 # CLASSIFICATION and REGRESSION TREE (CART)
 # =========================================
 
-def Node(object):
+class Node(object):
     """
         A decision tree is built with Nodes, which contain other nodes,
         the attibute and value to evaluate.
@@ -20,7 +20,7 @@ def Node(object):
         self.left = left
         self.right = right
 
-def Leaf(object):
+class Leaf(object):
     """
         End of the decision tree, contain the prediction
         Args:
@@ -28,10 +28,11 @@ def Leaf(object):
             value (float|string): the class prediction
     """
     def __init__(self, feature, value):
+        
         self.feature = feature
         self.value = value
 
-def DecisionTree(object):
+class DecisionTree(object):
     """
         Based DecisionTree for CART trees
         Args:
@@ -92,4 +93,7 @@ def DecisionTree(object):
 
 
         
+# To remove
+tree = DecisionTree()
+print(tree.max_depth)
 
