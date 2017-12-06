@@ -18,6 +18,18 @@ Because I use this project as a daily reference for my projects and research, al
 $ jupyter examples
 ```
 2. In the browser, typically `localhost:8888`, find and launch the notebook.
+3. Alternatively, if the example is a python file, run python with a module flag.
+```bash
+$ python -m src.examples.decision_tree
+```
+
+## Running the tests
+I try to write UnitTests with every algorithms or utils functions included in this repository.
+The UnitTest were writen with the `unittest` framework provided by Python.
+1. Run specific test files
+```bash
+$ python -m unittest src/utils/tests/test_dataset.py ...
+```
 
 ## Why?
 There are many projects (that might even be better than this one!) providing excellent walks through for many ML algorithms, like [ML-From-Scratch](https://github.com/eriklindernoren/ML-From-Scratch).
