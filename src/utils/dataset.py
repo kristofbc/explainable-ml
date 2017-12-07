@@ -42,9 +42,6 @@ def split_train_test_dataset(x, y, split_size, shuffle=False):
     x_y = np.concatenate((x, np.expand_dims(y, axis=1)), axis=1)
     x_y_train, x_y_test = split_dataset(x_y, split_size, shuffle)
     # Recover the training and targets from the split dataset
-    return x_y_train[:, :n_features], np.squeeze(x_y_train[:, n_features:]), x_y_test[:, :n_features], np.squeeze(x_y_test[:, n_features:])
-
-
-
+    return x_y_train[:, :n_features], np.squeeze(x_y_train[:, n_features:], axis=1), x_y_test[:, :n_features], np.squeeze(x_y_test[:, n_features:], axis=1)
 
 
