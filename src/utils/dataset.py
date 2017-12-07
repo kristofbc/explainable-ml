@@ -11,7 +11,7 @@ import math
     Returns:
         mixed[][], mixed[][]
 """
-def split_dataset(data, split_size, shuffle=False):
+def split_dataset(data, split_size, shuffle=True):
     idx = np.arange(len(data))
     # Shuffle the order of indexes if required
     if shuffle:
@@ -36,7 +36,7 @@ def split_dataset(data, split_size, shuffle=False):
     Returns:
         x_train (mixed[][]), x_test (mixed[][]), y_train (mixed[][]), y_test (mixed[][])
 """
-def split_train_test_dataset(x, y, split_size, shuffle=False):
+def split_train_test_dataset(x, y, split_size, shuffle=True):
     n_features = x.shape[1]
     # Concatenate training and targets for splitting the dataset
     x_y = np.concatenate((x, np.expand_dims(y, axis=1)), axis=1)

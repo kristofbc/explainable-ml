@@ -12,16 +12,16 @@ class DatasetTest(unittest.TestCase):
     def test_split_dataset_int(self):
         data = np.random.randint(0, 255, (20, 10))
         # Even split
-        x, y = dataset.split_dataset(data, 10)
+        x, y = dataset.split_dataset(data, 10, shuffle=False)
         self.assertEqual(x.shape, y.shape)
         self.assertFalse(np.allclose(x, y))
         # Uneven split
-        x, y = dataset.split_dataset(data, 15)
+        x, y = dataset.split_dataset(data, 15, shuffle=False)
         self.assertEqual(x.shape[0], 15)
         self.assertEqual(y.shape[0], data.shape[0]-15)
         self.assertFalse(np.allclose(x[:5], y[:5]))
         # Shuffled split
-        x, y = dataset.split_dataset(data, 10, True)
+        x, y = dataset.split_dataset(data, 10, shuffle=True)
         self.assertFalse(np.allclose(x, data[:10]))
         self.assertFalse(np.allclose(y, data[10:]))
 
@@ -31,16 +31,16 @@ class DatasetTest(unittest.TestCase):
     def test_split_dataset_float(self):
         data = np.random.randint(0, 255, (20, 10))
         # Even split
-        x, y = dataset.split_dataset(data, 0.5)
+        x, y = dataset.split_dataset(data, 0.5, shuffle=False)
         self.assertEqual(x.shape, y.shape)
         self.assertFalse(np.allclose(x, y))
         # Uneven split
-        x, y = dataset.split_dataset(data, 0.95)
+        x, y = dataset.split_dataset(data, 0.95, shuffle=False)
         self.assertEqual(x.shape[0], 19)
         self.assertEqual(y.shape[0], 1)
         self.assertFalse(np.allclose(x[:1], y[:1]))
         # Shuffled split
-        x, y = dataset.split_dataset(data, 0.5, True)
+        x, y = dataset.split_dataset(data, 0.5, shuffle=True)
         self.assertFalse(np.allclose(x, data[:10]))
         self.assertFalse(np.allclose(y, data[10:]))
 
@@ -48,21 +48,21 @@ class DatasetTest(unittest.TestCase):
         data_x = np.random.randint(0, 255, (20, 10))
         data_y = np.random.randint(0, 255, (20,))
         # Even split
-        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 10)
+        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 10, shuffle=False)
         self.assertEqual(x_train.shape[0], y_train.shape[0])
         self.assertEqual(x_test.shape[0], y_test.shape[0])
         self.assertEqual(x_train.shape[0], x_test.shape[0])
         self.assertEqual(len(y_train.shape), 1)
         self.assertEqual(len(y_test.shape), 1)
         # Uneven split
-        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 15)
+        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 15, shuffle=False)
         self.assertEqual(x_train.shape[0], y_train.shape[0])
         self.assertEqual(x_test.shape[0], y_test.shape[0])
         self.assertNotEqual(x_train.shape[0], x_test.shape[0])
         self.assertEqual(len(y_train.shape), 1)
         self.assertEqual(len(y_test.shape), 1)
         # Shuffled split
-        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 10, True)
+        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 10, shuffle=True)
         self.assertEqual(x_train.shape[0], y_train.shape[0])
         self.assertEqual(x_test.shape[0], y_test.shape[0])
         self.assertEqual(x_train.shape[0], x_test.shape[0])
@@ -74,21 +74,21 @@ class DatasetTest(unittest.TestCase):
         data_x = np.random.randint(0, 255, (20, 10))
         data_y = np.random.randint(0, 255, (20,))
         # Even split
-        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 0.5)
+        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 0.5, shuffle=False)
         self.assertEqual(x_train.shape[0], y_train.shape[0])
         self.assertEqual(x_test.shape[0], y_test.shape[0])
         self.assertEqual(x_train.shape[0], x_test.shape[0])
         self.assertEqual(len(y_train.shape), 1)
         self.assertEqual(len(y_test.shape), 1)
         # Uneven split
-        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 0.80)
+        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 0.80, shuffle=False)
         self.assertEqual(x_train.shape[0], y_train.shape[0])
         self.assertEqual(x_test.shape[0], y_test.shape[0])
         self.assertNotEqual(x_train.shape[0], x_test.shape[0])
         self.assertEqual(len(y_train.shape), 1)
         self.assertEqual(len(y_test.shape), 1)
         # Shuffled split
-        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 0.5, True)
+        x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(data_x, data_y, 0.5, shuffle=True)
         self.assertEqual(x_train.shape[0], y_train.shape[0])
         self.assertEqual(x_test.shape[0], y_test.shape[0])
         self.assertEqual(x_train.shape[0], x_test.shape[0])
