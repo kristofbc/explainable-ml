@@ -3,9 +3,9 @@ import numpy as np
 from src.utils import data
 from src.utils import evaluation
 
-# =========================================
-# CLASSIFICATION and REGRESSION TREE (CART)
-# =========================================
+# =====================================
+# BASE CLASSES FOR DECISION TREE (base)
+# =====================================
 
 class Node(object):
     """
@@ -335,29 +335,115 @@ class FunctionnalDecisionTree(DecisionTree):
 
         return super(FunctionnalDecisionTree, self).worth_splitting(current_depth, largest_cost, largest_cost_set)
 
-def ClassificationDecisionTree(minimum_reduction_cost=1e-7, max_depth=-1, minimum_sample_count=2):
-    def gain(y, split_left_y, split_right_y):
-        def entropy(y):
-            # Entropy, or deviance is the measure of "impurity"
-            # It quantifies the homogeneity of the dataset (homegeneous = 1, perfect 50% = 0)
-            # Defined as: -p(a)*log(p(a)) - p(b)*log(p(b))
-            log2 = lambda x: np.log(x) / np.log(2.0)
-            unique = data.count_unique_value(y)
-            entropy = 0.0
-            for value, count in unique.items():
-                p = count/len(y)
-                entropy += -p*log2(p)
-            return entropy
+    """
+        Set the gain function
+        Args:
+            f (function): the function to use as the gain function
+    """
+    def set_gain_function(self, f):
+        self._gain_function = f
 
-        
+    """
+        Set the leaf function
+        Args:
+            f (function): the function to use as the leaf function
+    """
+    def set_leaf_function(self, f):
+        self._leaf_function = f
+
+    """
+        Set the worth splitting function
+        Args:
+            f (function): the function to use as the worth_splitting function
+    """
+    def set_worth_splitting_function(self, f):
+        self._worth_splitting_function = f
+
+# Generic functions that can be used with FunctionnalDecisionTree
+"""
+    Used as a gain function, it takes a generic cost function to compute the normalized measure
+
+    gain = cost_function(y) - (len(y_left)/len(y) * cost_function(y_left) + len(y_right)/len(y) * cost_function(y_right))
+
+    Args:
+        cost_function (function): a function returning the cost of y
+    Returns:
+        float
+"""
+def normalized_measure_reduction_cost(cost_function):
+    def gain(y, split_left_y, split_right_y):
+
         p = len(split_left_y) - len(y)
-        y_cost = entropy(y)
-        y1_cost = entropy(split_left_y)
-        y2_cost = entropy(split_right_y)
+        y_cost = cost_function(y)
+        y1_cost = cost_function(split_left_y)
+        y2_cost = cost_function(split_right_y)
 
         gain = y_cost - p*y1_cost - (1.0-p)*y2_cost
         return gain
 
+    return gain
+
+"""
+    Entropy or deviance is the measure of "impurity"
+    It quantifies the homogeneity of the dataset (homegeneous = 1, perfect 50% = 0)
+
+    cost = -p(a)*log(p(a)) - p(b)*log(p(b))
+
+    Args:
+        y (float[]|string[]): entropy is computed on these values
+    Returns:
+        float
+"""
+def cost_function_entropy(y):
+    log2 = lambda x: np.log(x) / np.log(2.0)
+    unique = data.count_unique_value(y)
+    entropy = 0.0
+    for value, count in unique.items():
+        p = count/len(y)
+        entropy += -p*log2(p)
+    return entropy
+
+"""
+    Variance of y
+
+    cost = \sum(y_i - mean(y))^2
+
+    Args:
+        y (float[]|string[]): sum-of-square is computed on these values
+    Returns:
+        float
+"""
+def cost_function_variance(y):
+    y_mean = np.mean(y)
+    return np.sum(np.square(y - y_mean))
+
+"""
+    The gini index is the expected error rate
+
+    cost = \sum(len(y_k)/len(y) * (1 - (len(y_k)/len(y))))
+
+    Args:
+        y (float[]|string[]): sum-of-square is computed on these values
+    Returns:
+        float
+"""
+def cost_function_gini(y):
+    unique = data.count_unique_value(y)
+    gini = 0.0
+    for value1, count1 in unique.items():
+        p1 = count1/len(y)
+        for value2, count2 in unique.items():
+            if value1 == value2:
+                continue
+            p2 = count2/len(y)
+            gini += p1*p2
+
+    return gini
+
+# =================================================================
+# IMPLEMENTATION OF CLASSIFICATION and REGRESSION TREE: CART (impl)
+# =================================================================
+def ClassificationDecisionTree(minimum_reduction_cost=1e-7, max_depth=-1, minimum_sample_count=2, cost_function=cost_function_entropy):
     def leaf(y):
         # Count how many time a value is found inside the data
         # {value: count}
@@ -367,25 +453,10 @@ def ClassificationDecisionTree(minimum_reduction_cost=1e-7, max_depth=-1, minimu
         return largest_cost > minimum_reduction_cost
 
     return FunctionnalDecisionTree(max_depth, minimum_sample_count, 
-                                   gain_function=gain, leaf_function=leaf, worth_splitting_function=worth_splitting)
+                                   gain_function=normalized_measure_reduction_cost(cost_function), 
+                                   leaf_function=leaf, worth_splitting_function=worth_splitting)
 
-def RegressionDecisionTree(minimum_reduction_cost=1e-7, max_depth=-1, minimum_sample_count=2):
-    def gain(y, split_left_y, split_right_y):
-        def sum_of_square(y):
-            # Sum of the difference between a value and the mean
-            # (yi - y_mean)^2
-            y_mean = np.mean(y)
-            return np.sum(np.square(y - y_mean))
-        
-        p1 = len(split_left_y) - len(y)
-        p2 = len(split_right_y) - len(y)
-        y_cost = sum_of_square(y)
-        y1_cost = sum_of_square(split_left_y)
-        y2_cost = sum_of_square(split_right_y)
-
-        gain = y_cost - (p1*y1_cost + p2*y2_cost)
-        return gain
-
+def RegressionDecisionTree(minimum_reduction_cost=1e-7, max_depth=-1, minimum_sample_count=2, cost_function=cost_function_variance):
     def leaf(y):
         # Leaf contain the mean of y
         value = np.mean(y)
@@ -395,5 +466,6 @@ def RegressionDecisionTree(minimum_reduction_cost=1e-7, max_depth=-1, minimum_sa
         return largest_cost > minimum_reduction_cost
 
     return FunctionnalDecisionTree(max_depth, minimum_sample_count, 
-                                   gain_function=gain, leaf_function=leaf, worth_splitting_function=worth_splitting)
+                                   gain_function=normalized_measure_reduction_cost(cost_function), 
+                                   leaf_function=leaf, worth_splitting_function=worth_splitting)
 
