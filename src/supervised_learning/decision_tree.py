@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 from src.utils import data
 from src.utils import evaluation
@@ -271,6 +272,67 @@ class DecisionTree(object):
             right_y = np.squeeze(right[:, n_features:], axis=1)
             
         return left_x, left_y, right_x, right_y
+
+    """
+        Prune the tree to prevent overfitting via cross-validation on gain
+        This function returns a new instance of the DecisionTree, but pruned
+        Args:
+            alpha (float): minimum gain to achieve
+        Returns:
+            DecisionTree
+    """
+    def prune(self, alpha=0.5):
+        if self._tree is None:
+            raise RuntimeError("tree should be trained before pruning")
+
+        # Recursively walk the tree
+        pruned_inst = copy.deepcopy(self)
+        pruned_inst._tree = pruned_inst._prune_tree(pruned_inst._tree, alpha)
+        return pruned_inst
+
+    """
+        Walk the tree recursively and prune it based on the gain and alpha value
+        Args:
+            node (Node|Leaf): current node to evaluate
+            alpha (float): minimum accepted gain for pruning
+        Returns:
+            Node|Leaf
+    """
+    def _prune_tree(self, node, alpha):
+        # We reach the bottom, return the Leaf
+        if isinstance(node, Leaf):
+            return node
+
+        # Walk the tree and find a Lead node if possible
+        if not isinstance(node.left, Leaf):
+            node.left = self._prune_tree(node.left, alpha)
+        if not isinstance(node.right, Leaf):
+            node.right = self._prune_tree(node.right, alpha)
+        
+        # Merge leaves based on the gain and alpha
+        if isinstance(node.left, Leaf) and isinstance(node.right, Leaf):
+            left, right = [], []
+            # Create a list of values expanded count times
+            left = [[value] * int(count) for value, count in node.left.value.items()]
+            right = [[value] * int(count) for value, count in node.right.value.items()]
+            if len(left) > 0:
+                left = np.concatenate(left, axis=0)
+            if len(right) > 0:
+                right = np.concatenate(right, axis=0)
+
+            # Get the gain on our new "y", which is the concatenation of left and right
+            y = np.concatenate((left, right), axis=0)
+            gain = self.gain(y, left, right)
+
+            # Prune if the gain is bellow the threshold
+            if gain < alpha:
+                print("Node was pruned")
+                # The Node becomes a Leaf
+                return Leaf(value=self.leaf(y))
+
+        # Return the normal Node, no merge was performed
+        return node
+        
 
 class FunctionnalDecisionTree(DecisionTree):
     """

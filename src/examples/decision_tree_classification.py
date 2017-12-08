@@ -17,8 +17,11 @@ def main():
     # ClassificationDecisionTree
     tree = ClassificationDecisionTree()
     tree.train(x_train, y_train)
+    pruned_tree = tree.prune()
     y_pred = tree.predict(x_test)
+    y_pred_pruned = pruned_tree.predict(x_test)
     print("Classification result: {}".format(evaluation.accuracy(y_pred, y_test)))
+    print("Classification result pruned: {}".format(evaluation.accuracy(y_pred_pruned, y_test)))
 
     # Sklearn tree
     clf = sktree.DecisionTreeClassifier()
