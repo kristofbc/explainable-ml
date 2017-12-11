@@ -326,7 +326,6 @@ class DecisionTree(object):
 
             # Prune if the gain is bellow the threshold
             if gain < alpha:
-                print("Node was pruned")
                 # The Node becomes a Leaf
                 return Leaf(value=self.leaf(y))
 
