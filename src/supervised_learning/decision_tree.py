@@ -68,7 +68,7 @@ class DecisionTree(object):
         The gain is used to evaluate the quality of a proposed split.
         Depends on the goal of the three: regression or classification
         Args:
-            y (float[]): normalized target classes
+            y (float[]): target classes
             split_left_y (float[]): target classed split left
             split_left_y (float[]): target classed split right
         Returns:
@@ -102,8 +102,8 @@ class DecisionTree(object):
     """
         Train the decision tree
         Args:
-            x (float[][]): normalized training dataset
-            y (float[]): normalized target classes
+            x (float[][]): training dataset
+            y (float[]): target classes
     """
     def train(self, x, y):
         x = np.asarray(x)
@@ -114,7 +114,7 @@ class DecisionTree(object):
     """
         Predict/classify the samples
         Args:
-            x (float[][]): normalized sampled to predict/classify
+            x (float[][]): sample to predict/classify
             maximum_predicted_value (boolean): instead of returning a dictionnary containing the prediction,
                 return a single value
         Returns:
@@ -181,8 +181,8 @@ class DecisionTree(object):
     """
         Build the decision three recursively
         Args:
-            x (float[][]): normalized training dataset
-            y (float[]): normalized target classes
+            x (float[][]): training dataset
+            y (float[]): target classes
             current_depth (int): current depth of the three
         Returns:
             Node|Leaf
@@ -239,8 +239,8 @@ class DecisionTree(object):
     """
         Split the dataset by value for the specified feature
         Args:
-            x (float[][]): normalized training dataset
-            y (float[]): normalized target classes
+            x (float[][]): training dataset
+            y (float[]): target classes
             feature (int): index of the feature
             pivot (float|string): threshold required to split the dataset
         Returns:
@@ -355,7 +355,7 @@ class FunctionnalDecisionTree(DecisionTree):
         The gain is used to evaluate the quality of a proposed split.
         Depends on the goal of the three: regression or classification
         Args:
-            y (float[]): normalized target classes
+            y (float[]): target classes
             split_left_y (float[]): target classed split left
             split_left_y (float[]): target classed split right
         Returns:
