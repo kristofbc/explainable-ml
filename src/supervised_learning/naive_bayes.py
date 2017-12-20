@@ -156,25 +156,4 @@ class BayesianNaiveBayes(object):
         self.beta1 = beta1
         self.beta2 = beta2
 
-    
-
-from sklearn import naive_bayes as skbayes
-from sklearn import datasets
-from src.utils import dataset 
-from src.utils import evaluation
-
-data = datasets.load_digits()
-x = data.data
-y = data.target
-x_train, y_train, x_test, y_test = dataset.split_train_test_dataset(x, y, split_size=0.6, shuffle=True)
-
-cls = GaussianNaiveBayes()
-cls.train(x_train, y_train)
-y_pred = cls.predict(x_test)
-print("Classification result: {}".format(evaluation.accuracy(y_pred, y_test)))
-
-cls = skbayes.GaussianNB()
-y_pred = cls.fit(x_train, y_train).predict(x_test)
-print("Scikit-learn classification result: {}".format(evaluation.accuracy(y_pred, y_test)))
-
 
