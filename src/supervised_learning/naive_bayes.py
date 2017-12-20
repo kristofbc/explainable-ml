@@ -87,7 +87,7 @@ class GaussianNaiveBayes(object):
             class_likelihoods = self.likelihood(x[i], self.means, self.variances)
             class_score = self.priors * np.prod(class_likelihoods, axis=1)
 
-            # Below is an example with 1 or 2 more loop, the code below does exactly the same (use numpy broadcasting ability)
+            # Below is an example with 1 or 2 more loop, the code above does exactly the same (use numpy broadcasting ability)
             # For each class, find the one with the highest score
             #for j in range(n_classes):
             #    prior = self.priors[j]
@@ -138,22 +138,100 @@ class GaussianNaiveBayes(object):
         return len(match) / len(self.x)
 
 
-class BayesianNaiveBayes(object):
+class MultinomialNaiveBayes(object):
     """
-        Bayesian Naive Bayes (or Dirichlet-Multinomial Classifiers) assume the the features are 
-            conditionnaly independent given the class label.
-        "naive" because we do not expect the features to be independent, even conditional on class label.
-        
-        To overcome overfitting, this classifier is Bayesian: it use a factored prior at training time
+        Conditional distribution assuming conditionally independent features given the class label.
+        "naive" because we do not expect the features to be independent, even conditional on the class label
+
+        P(y|x) = \dfrac{P(x|y)P(y)}{P(x)} == p(class|data) = \dfrac{p(data|class)P(class)}{p(data)}
+
+        y = class, x = data
+        p(y|x) = posterior
+        p(x|y) = likelihood
+        p(y) = prior
+        p(x) = marginal probability
+
+        For multinomial distributed data
 
         Args:
-            alpha (float): alpha used in the Dirichlet distribution
-            beta1 (float): beta1 used in the beta distribution
-            beta2 (float): beta2 used in the beta distrbution
+            alpha (float): hyperparameter of the model
     """
-    def __init__(self, alpha=1, beta1=1, beta2=1):
+    def __init__(self, alpha=1.0):
         self.alpha = alpha
-        self.beta1 = beta1
-        self.beta2 = beta2
+        self.frequency = None
+        self.priors = None
+        self.x = None
+        self.y = None
+
+    """
+        Train the model with the training dataset
+
+        \theta_yi =  \dfrac{N_yi + \alpha}{N_y + \alpha * n}
+
+        \theta_yi = log probability of each feature
+        N_yi = sum of feature i that appear in class y
+        N_y = sum N_y, total count of feature for class y
+        n = number of feature
+
+        Args:
+            x (float[][]): training dataset
+            y (float[]): labels for the training dataset
+    """
+    def train(self, x, y):
+        # Parameters for training
+        self.x = x
+        self.y = y
+        classes = np.unique(y)
+        n_classes = len(classes)
+        n_features = x.shape[1]
+        self.frequency = np.zeros((n_classes, n_features))
+        self.priors = np.zeros(n_classes)
+        eps = 1e-9 # Avoid division by zero
+ 
+        # The relative frequency ~ smoothed maximum likelihood
+        for i in range(n_classes):
+            # The class prior
+            self.priors[i] = self.prior(classes[i])
+
+            x_y_class = x[np.where(y == classes[i])]
+            # Number of time feature i appear in class y
+            n_yi = np.sum(x_y_class, axis=0)
+            # Number of feature in class y
+            n_y = np.sum(n_yi)
+            #theta = (n_yi + self.alpha)  / (n_y + self.alpha*n_features + eps)
+            theta = np.log(n_yi + self.alpha) - np.log(np.reshape(n_y + self.alpha*n_features + eps, (-1, 1)))
+            self.frequency[i] = theta
+
+    """
+        Apply the classifier to new data points
+        Args:
+            x (float[][]): sample to classify
+        Returns:
+            float[]
+    """
+    def predict(self, x):
+        # Parameters for prediction
+        n_samples = x.shape[0]
+        y_pred = np.zeros(n_samples)
+
+        # Predict for each data point
+        for i in range(n_samples):
+            # Probability of each class
+            class_prob = self.priors + np.dot(x[i], self.frequency.T)
+            # Keep the highest probability
+            y_pred[i] = np.argmax(class_prob)
+
+        return y_pred
 
 
+    """
+        Compute the prior p(z): number of time z is found in the samples
+        Args:
+            x (float): find the occurence of this inputs in the samples
+        Returns:
+            float
+    """
+    def prior(self, z):
+        match = self.x[np.where(self.y == z)]
+        return len(match) / len(self.x)
+    

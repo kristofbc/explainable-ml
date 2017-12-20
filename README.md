@@ -1,4 +1,4 @@
-# Explainable Machine Learning [ML]
+# Explainable Machine Learning (explainable-ml)
 As a student, this repository keeps track of all the ML algorithms I've seen in my lectures and in my research.
 This project is my journey to a better understanding of ML algorithms.
 Most of the code included is intended to provide a clear explanation; thus it might not be optimized. Hence, some algorithms found here might not be suitable for production.
